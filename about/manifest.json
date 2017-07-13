@@ -2,12 +2,10 @@
     "version": 0,
 
     "tools": {
-        "about": {
-            "label": "about",
+        "About": {
             "path": "about.html"
         }
     },
 
     "content-security-policy": "default-src 'self' 'unsafe-inline' 'unsafe-eval'"
 }
-
