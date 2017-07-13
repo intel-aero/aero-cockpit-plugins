@@ -11,6 +11,6 @@ endif
 
 install-%:
 	$(Q)install -d $(DEST)$(DATADIR)$*
-	$(Q)install $(wildcard $*/*) $(DEST)$(DATADIR)$*/
+	$(Q)install -m 0644 $(wildcard $*/*) $(DEST)$(DATADIR)$*/
 
 install: $(addprefix install-,$(PLUGINS))
