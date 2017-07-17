@@ -1,0 +1,25 @@
+<head>
+<title>Software-update</title>
+ <meta charset="utf-8">
+    <link href="../base1/cockpit.css" type="text/css" rel="stylesheet">
+    <script src="../base1/jquery.js"></script>
+    <script src="../base1/cockpit.js"></script>
+    <script type="text/javascript">
+
+function fun1()
+{
+            var proc = cockpit.spawn("aero-reboot-update.py");
+            proc.fail(On_fail);
+        }
+
+        function On_fail(data) {
+        output.append("No USb connected or no valid image found in the USB");
+        }
+
+</script>
+</head>
+<body>
+<h2>Insert usb and click on update</h2>
+<button type="button" onclick=fun1();>update</button>
+<span id="output"></span>
+</body>
