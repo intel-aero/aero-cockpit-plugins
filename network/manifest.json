@@ -2,8 +2,8 @@
     "version": 0,
 
     "tools": {
-        "network": {
-            "label": "Wi-fi Network",
+        "Network": {
+            "label": "Network",
             "path": "network.html"
         }
     },

@@ -1,5 +1,4 @@
 #!/bin/bash
-#!/bin/bash
 
 set -e
 
@@ -7,9 +6,15 @@ FILECONDITION="/etc/sysconfig/connman"
 SSID=$1
 PASSWORD=$2
 
-mkdir -p $(dirname $FILECONDITION)
 /usr/bin/connmanctl enable wifi || true
-/usr/bin/connmanctl tether wifi $SSID $PASSWORD
+/usr/bin/connmanctl tether wifi $SSID $PASSWORD 2>error
+if grep -rw "Error" error; then
+	rm error
+        exit 1
+fi
+
+rm error
+
 /usr/bin/connmanctl tether wifi off
 
 retries=5
@@ -21,5 +26,8 @@ while [ $retries -gt 0 ]; do
     fi
     sleep 1
     retries=$((retries - 1))
-    echo "Retry #$((5 - retries))"
 done
+
+if [ $retries -gt 0 ]; then
+	echo "Configuration Successfull"
+fi

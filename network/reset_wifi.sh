@@ -1,5 +1,4 @@
 #!/bin/bash
-#!/bin/bash
 
 set -e
 
@@ -23,8 +22,6 @@ while [ 1 ]; do
     break
 done
 
-mkdir -p $(dirname $FILECONDITION)
-#/usr/bin/connmanctl enable wifi || true
 /usr/bin/connmanctl tether wifi $SSID $DEFAULTPASSWORD
 /usr/bin/connmanctl tether wifi off
 
@@ -40,3 +37,6 @@ while [ $retries -gt 0 ]; do
     echo "Retry #$((5 - retries))"
 done
 
+if [ $retries -gt 0 ]; then
+        echo "Configuration Successfull"
+fi

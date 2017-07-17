@@ -52,7 +52,7 @@
         $("#change_ssid").on("click", rename_ssid_run);
 
         function rename_ssid_run() {
-            var proc = cockpit.spawn(["sh", "/usr/share/cockpit/network/change_ssid.sh", new_ssid.val(), password.val()]);
+            var proc = cockpit.spawn(["sh", "/usr/share/cockpit/network/connman-configure-ssid.sh", new_ssid.val(), password.val()]);
 	    proc.done(rename_ssid_success);
             proc.stream(rename_ssid_output);
             proc.fail(rename_ssid_fail);
