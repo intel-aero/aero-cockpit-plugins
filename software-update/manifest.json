@@ -3,7 +3,7 @@
 
     "tools": {
         "update": {
-            "label": "Software-update",
+            "label": "Software Update",
             "path": "update.html"
         }
     },
