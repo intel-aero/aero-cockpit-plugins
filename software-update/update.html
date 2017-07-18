@@ -6,19 +6,19 @@
     <script src="../base1/cockpit.js"></script>
     <script type="text/javascript">
 
-        function fun1() {
+        function update_onclick() {
             var proc = cockpit.spawn("aero-reboot-update.py");
-            proc.fail(On_fail);
+            proc.fail(update_onfail);
         }
 
-        function On_fail(data) {
-            output.append("No USb connected or no valid image found in the USB");
+        function update_onfail(data) {
+            output.append("No USB connected or no valid OS image found");
         }
 
     </script>
 </head>
 <body>
     <h2>Insert usb and click on update</h2>
-    <button type="button" onclick=fun1();>update</button>
-    <span id="output"></span>
+    <button type="button" onClick="update_onclick()">Update</button>
+    <span id="output" />
 </body>
