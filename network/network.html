@@ -1,0 +1,99 @@
+ <head>
+    <title>Wifi Network</title>
+    <meta charset="utf-8">
+    <link href="../base1/cockpit.css" type="text/css" rel="stylesheet">
+    <script src="../base1/jquery.js"></script>
+    <script src="../base1/cockpit.js"></script>
+</head>
+<body>
+	<button class="network"  id="1" style="margin-left: 20px; margin-top: 20px;"> <font size="2" face="sans-serif"> Change SSID </font></button>
+	<button class="network" id="2" style="margin-top:20px;"> <font size="2" face="sans-serif">Reset to Default </font></button>
+	<div class="1" id="div1" style='max-width: 400px; margin-left:20px; margin-top: 20px'>
+	<table class="cockpit-form-table">
+            <tr>
+                <td><label class="control-label" for="new_ssid"> <font size="2" face="sans-serif">New SSID </font></label></td>
+                <td><input class="form-control" id="new_ssid" value=""></td>
+            </tr>
+            <tr>
+                <td><label class="control-label" for="password"> <font size="2" face="sans-serif">Password</label></td>
+                <td><input class="form-control" id="password" value=""></td>
+            </tr>
+        </table>
+	<button class="btn btn-default btn-primary" id="change_ssid" style="margin-top: 20px; margin-left:100px; auto;'> <font size="2" face="sans-serif">Rename SSID </font></button>
+        <span id="result"></span>
+        <p>
+            <pre id="output" style='display:none'></pre>
+        </p>
+	</div>
+
+	<div class="2" id="div2" style='max-width: 400px;  margin-left:20px; margin-top: 20px; display: none'>
+        <button id="reset"> <font size="2" face="sans-serif">Reset SSID </font></button>
+	 <p>                                                                         
+            <pre id="output2"></pre>                                                                    
+        </p>
+        </div>
+
+	<script>
+		$(".network").bind("click",function() {
+			$(".1").hide();
+			$(".2").hide();			
+			var divId=$(this).attr("id");
+			$("."+divId).show();
+		});
+	</script>
+
+	<script>
+        var new_ssid = $("#new_ssid");
+        var password = $("#password");
+        var output = $("#output");
+        var result = $("#result");
+	var output2 = $("#output2");
+
+        $("#change_ssid").on("click", rename_ssid_run);
+
+        function rename_ssid_run() {
+            var proc = cockpit.spawn(["sh", "/usr/share/cockpit/network/connman-configure-ssid.sh", new_ssid.val(), password.val()]);
+	    proc.done(rename_ssid_success);
+            proc.stream(rename_ssid_output);
+            proc.fail(rename_ssid_fail);
+
+            result.empty();
+            output.empty();
+        }
+	
+	function rename_ssid_success() {
+		output.show();
+		output.append("Sucsessfully changed SSID");
+
+	}
+
+        function rename_ssid_fail() {
+            result.css("color", "red");
+            result.text("Error in changing SSID");
+        }
+
+        function rename_ssid_output(data) {
+	    output.show();
+            output.append(document.createTextNode(data));
+        }
+
+	$("#reset").on("click", reset_ssid);
+
+	function reset_ssid() {
+		var proc=cockpit.spawn(["sh", "/usr/share/cockpit/network/reset_wifi.sh"]);
+		proc.done(reset_success);
+		proc.fail(reset_fail);
+	}
+
+	function reset_success() {
+		output.show();
+		output2.append("Reset successfull");
+	}
+	
+	function reset_fail() {
+		output.show();
+		output2.append("Reset Failure");
+	}
+    </script>
+
+</body>
