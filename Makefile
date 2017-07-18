@@ -1,7 +1,7 @@
 DEST ?=
 DATADIR ?= /usr/share/cockpit/
 
-PLUGINS := about
+PLUGINS := about software-update
 
 ifeq ($(V),1)
   Q =
