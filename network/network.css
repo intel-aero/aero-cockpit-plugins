@@ -1,0 +1,18 @@
+button.network {
+	margin-left: 20px; 
+	margin-top: 20px;
+}
+div {
+	max-width: 400px;
+	margin-left: 20px; 
+	margin-top: 20px;
+}
+
+button.btn {
+	margin-top: 20px; 
+	margin-left: 80px; 
+	auto;
+}
+pre {
+	display: none;
+}
