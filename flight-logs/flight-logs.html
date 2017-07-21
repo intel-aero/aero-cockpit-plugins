@@ -1,0 +1,56 @@
+<html>                                                                                    
+<head>                                         
+    <title>flight</title>             
+    <link href="../base1/cockpit.css" type="text/css" rel="stylesheet">                   
+    <script src="../base1/jquery.js"></script>                                            
+    <script src="../base1/cockpit.js"></script>     
+</head>                                                                                   
+<body onload="flightlogs()">                                                              
+    <div id='this_element_contains_my_buttons'></div>                                     
+   <pre id="output" style="background:white;"></pre>                                      
+    <script>                                                                              
+                                                                                          
+        function flightlogs() {                                
+            var proc = cockpit.spawn(["sh", "/usr/share/cockpit/flight-logs/log-dir.sh"]);
+            proc.stream(flight_output);                                                                       
+        }                                                                                                     
+        function flight_output(data) {                                                    
+                                                                      
+            var buttonsToCreate = data.split("\n");                                                           
+            var i, buttonContainer, newButton;                                                                
+            buttonContainer = document.getElementById('this_element_contains_my_buttons');
+            for (i = 0; i < buttonsToCreate.length - 1; i++){
+                   newButton = document.createElement('input');       
+                   newButton.type = 'button';                                                                 
+                   newButton.value = buttonsToCreate[i];                                                      
+                   newButton.id = buttonsToCreate[i];   
+                   newButton.onclick = function () {
+                      document.getElementById("output").innerHTML=" ";
+                      var proc = cockpit.spawn(["sh", "/usr/share/cockpit/flight-logs/get-logs.sh", this.id]);
+                      proc.stream(get_logs);            
+                      }
+                  
+                   buttonContainer.appendChild(newButton);
+              }                                         
+                                                        
+        }                   
+                            
+        function get_logs(data) {
+           output.append(document.createTextNode(data));
+                            
+        }                   
+    </script>              
+<style>                                                                                                       
+#output{                                                
+background: white;     
+width: 97%;       
+height: 80%;                                              
+margin-left: 2%;                                        
+margin-top: 2%;                                         
+border-left:1px solid black;
+border-top:1px solid black; 
+overflow: scroll;                
+}                                                       
+</style>                    
+</body>                     
+</html>            
