@@ -2,8 +2,7 @@
     "version": 0,
 
     "tools": {
-        "Flight": {
-            "label": "Flight logs",
+        "Flight logs": {
             "path": "flight-logs.html"
         }
     },
