@@ -16,3 +16,8 @@ button.btn {
 pre {
 	display: none;
 }
+
+div.3 {
+    float: left;
+    margin: 2px 10px;
+}
