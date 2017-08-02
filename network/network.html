@@ -1,14 +1,15 @@
 <head>
     <title>Wifi Network</title>
     <meta charset="utf-8">
-    <link href="network.css" type="text/css" rel="stylesheet">
     <link href="../base1/cockpit.css" type="text/css" rel="stylesheet">
+    <link href="network.css" type="text/css" rel="stylesheet">
     <script src="../base1/jquery.js"></script>
     <script src="../base1/cockpit.js"></script>
 </head>
 <body>
     <button class="network"  id="1" > Change SSID </button>
     <button class="network" id="2" style='margin-left:0px'> Reset to Default </button>
+    <button class="network" id="3" style='margin-left:0px'> Station Mode </button>
     <div class="1" id="div1" >
         <table class="cockpit-form-table">
             <tr>
@@ -34,10 +35,29 @@
         </p>
     </div>
 
+    <div class="3" id="div3" style='display:none'>
+        <div id="bloc1" style="float: left; display: inline;">
+            <br><button id="scan" > Scan </button></br> </div>
+        <div id="bloc2">
+            <select id="wifi_ssid_list" size=0  style="margin:22px"></select>
+        </div>
+        <br><table class="cockpit-form-table">
+            <tr>
+                <td><label class="control-label" for="password_wifi"> Password </label></td>
+                <td><input class="form-control" id="password_wifi" value=""></td>
+            </tr>
+        </table></br>
+        <button id="connect" > Connect </button>
+        <span id="result"></span>
+        <p>
+            <pre id="output3"></pre>
+        </p>
+    </div>
     <script>
         $(".network").bind("click",function() {
             $(".1").hide();
             $(".2").hide();
+            $(".3").hide();
             var divId=$(this).attr("id");
             $("."+divId).show();
         });
@@ -49,8 +69,14 @@
         var output = $("#output");
         var result = $("#result");
         var output2 = $("#output2");
+        var output3 = $("#output3");
+        var ssid;
+        var key_wifi = [];
+        var password_wifi = $("#password_wifi");
 
         $("#change_ssid").on("click", rename_ssid_run);
+        $("#scan").on("click", scan_wifi);
+        $("#connect").on("click", connect_wifi);
 
         function rename_ssid_run() {
             var proc = cockpit.spawn(["bash", "/usr/share/cockpit/network/connman-configure-ssid.sh", new_ssid.val(), password.val()]);
@@ -93,6 +119,86 @@
         function reset_fail() {
            output2.show();
            output2.append("Reset Failure");
+        }
+
+        function scan_wifi() {
+            var select_element = document.getElementById("wifi_ssid_list");
+            var length = select_element.options.length;
+            output3.empty();
+            for (i=length-1;i>=0;i--)
+            {
+                select_element.remove(i);
+            }
+            select_element.size=0;
+            while(key_wifi.length>0)
+            {
+                key_wifi.pop();
+            }
+            var proc = cockpit.spawn(["python", "/usr/share/cockpit/network/scan_wifi.py"]);
+            proc.done(scan_wifi_done);
+            proc.fail(scan_wifi_fail);
+        }
+
+        function scan_wifi_done() {
+            output3.show();
+            output3.append("Scanning Successfull\n");
+            read_file();
+        }
+
+        function scan_wifi_fail() {
+            output3.show();
+            output3.append("Scan unsuccessfull\n");
+        }
+
+        function read_file() {
+            d = new Date();
+            var txtFile = new XMLHttpRequest();
+            txtFile.open("GET","output.txt?t="+d.getTime(), true);
+            txtFile.setRequestHeader("Cache-Control", "no-cache");
+            txtFile.onreadystatechange = function() {
+                if (txtFile.readyState == 4 && (txtFile.status == 200 || txtFile.status == 0)) {
+                    var lines = txtFile.responseText.split("\n");
+                    for(var line = 0; line < lines.length; line++) {
+                        var inner_array = [];
+                        lines[line]=lines[line].trim();
+                        var res=lines[line].split(' ');
+                        len=res.length;
+                        var key=res[line-1];
+                        res=res.slice(0,len-1);
+                        res=res.join(" ");
+                        inner_array.push(res);
+                        inner_array.push(key);
+                        key_wifi.push(inner_array);
+                        inner_array.pop();
+                    }
+                    document.getElementById("wifi_ssid_list").size = lines.length-1;
+                    for(var i=0; i<lines.length-1; i++)
+                    {
+                        var ssid=key_wifi[i];
+                        $('<option value="'+ssid[0]+'">'+ssid[0]+'</option>').appendTo('#wifi_ssid_list');
+                    }
+                }
+            };
+            txtFile.send();
+        }
+
+        function connect_wifi() {
+            var el = document.getElementById("wifi_ssid_list");
+            var str_el = el.options[el.selectedIndex].text;
+            str_el = str_el.replace("*A ",'');
+            var proc = cockpit.spawn(["python","/usr/share/cockpit/network/connect_wifi.py", str_el, password_wifi.val()]);
+            proc.done(connect_wifi_done);
+            proc.fail(connect_wifi_fail);
+        }
+
+        function connect_wifi_done() {
+            output3.append("connection  succesfull\n");
+            document.getElementById('password_wifi').value = "";
+        }
+
+        function connect_wifi_fail() {
+            output3.append("connect:Failure\n");
+            document.getElementById('password_wifi').value = "";
         }
     </script>
 </body>
