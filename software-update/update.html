@@ -1,24 +1,131 @@
+<! DOCTYPE html>
+<html>
 <head>
     <title>Software Update</title>
     <meta charset="utf-8">
     <link href="../base1/cockpit.css" type="text/css" rel="stylesheet">
+    <link href="../base1/system.css"" type="text/css"  rel="stylesheet">
+    <link href="../base1/patternfly.css" type="text/css" rel="stylesheet">
     <script src="../base1/jquery.js"></script>
     <script src="../base1/cockpit.js"></script>
-    <script type="text/javascript">
-
-        function update_onclick() {
-            var proc = cockpit.spawn("aero-reboot-update.py");
-            proc.fail(update_onfail);
-        }
-
-        function update_onfail(data) {
-            output.append("No USB connected or no valid OS image found");
-        }
-
-    </script>
 </head>
-<body>
-    <h2>Insert usb and click on update</h2>
-    <button type="button" onClick="update_onclick()">Update</button>
-    <span id="output" />
+<body onload="createMenu()" style="font-family: "Open Sans",Helvetica,Arial,sans-serif;
+     font-size: 12px;
+     line-height: 1.66666667;
+     color: #363636;
+">
+<div class="content-header-extra">
+<div class="btn-group" id="update-tabs">
+<button class="btn btn-default" onclick="update()">BIOS Update</button>
+<button class="btn btn-default " onclick="sysUpdate()">System Update</button>
+<select class="btn btn-default" id="mymenu3" onchange="onFpgaSelect()"></select>
+<select class="btn btn-default" id="mymenu4" onchange="onFcUpdate()"></select>
+</div>
+</div>
+<div class="panel panel-default" style="margin-top:6em;border:#FFFFFF">
+	<div class="panel-heading">
+	</div>     
+        <div class="panel-content">
+ <pre style="font-size:12px;color:#363636" id="output" > </pre>
+
+</div>
+        </div>
+ <script>
+function update()
+{
+           var proc = cockpit.spawn(["sh", "/usr/share/cockpit/software-update/bios.sh"]);
+            output.innerHTML=" ";
+            proc.stream(bios_stream);
+
+}
+function sysUpdate()
+{
+       var proc = cockpit.spawn("aero-reboot-update.py");      
+            output.innerHTML=" ";                                                               
+            proc.stream(bios_stream); 
+            proc.fail(function(data){
+
+          output.append(document.createTextNode("No USB device found. Please connect a USB drive with update image.Refusing to reboot."));
+});
+          
+}
+function bios_stream(data) {
+            output.append(document.createTextNode(data));
+        }
+
+function createMenu()
+{
+            var textnode3 = document.getElementById("mymenu3");
+            var textnode4 = document.getElementById("mymenu4");
+            var proc = cockpit.spawn(["sh", "/usr/share/cockpit/software-update/fpga_list.sh"]);
+		 proc.stream(function(data){
+                var fileList = data.split("\n");
+                var prepend=new Option();
+                prepend.value="0";
+                prepend.text="Select FPGA File";
+                textnode3.options.add(prepend); 
+                for(var i=0;i<fileList.length-1;i++)
+ 		{ var op = new Option();
+ 	 	 op.value = fileList[i];
+  	 	 op.text = fileList[i];
+	 
+      		textnode3.options.add(op);
+        	}
+
+           });                                                       
+            var proc1 = cockpit.spawn(["sh", "/usr/share/cockpit/software-update/fc_firm_list.sh"]);
+            proc1.stream(function(data){
+                console.log("Inside second stream");
+                var fileList = data.split("\n");
+                var prepend=new Option();
+                prepend.value="0";
+                prepend.text="Select FC File";
+                textnode4.options.add(prepend);
+                console.log("After Add"); 
+                for(var i=0;i<fileList.length-1;i++)
+ 		{ var op = new Option();
+ 	 	 op.value = fileList[i];
+  	 	 op.text = fileList[i];
+	 
+      		textnode4.options.add(op);
+        	}
+           }); 
+  
+ 
+}
+
+function onFpgaSelect()
+{
+   var fileName=document.getElementById("mymenu3").value;
+   if(fileName==0){
+     return;
+
+    }
+   else{ var proc = cockpit.spawn(["sh", "/usr/share/cockpit/software-update/fpga_update.sh", fileName]);
+           output.innerHTML=" ";                                           
+            proc.stream(function(data){
+
+                output.append(document.createTextNode(data));        
+          });     
+       } 
+}
+function onFcUpdate()
+{
+          var fileName=document.getElementById("mymenu4").value;                                                                                 
+  if(fileName==0){                                                                                                                        
+     return;                                                                                                                              
+                                                                                                                                          
+    }                                                                                                                                     
+   else{ var proc = cockpit.spawn(["sh", "/usr/share/cockpit/software-update/fc_firm_update.sh", fileName]);                                             
+           output.innerHTML=" ";                                                                                                          
+            proc.stream(function(data){ 
+                                                                                                  
+                output.append(document.createTextNode(data));                                                                                                                                                                                                                                                                                  
+          });                                                                                                                             
+       }         
+ 
+}
+  
+</script>
 </body>
+</html>
