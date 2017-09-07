@@ -1,24 +1,404 @@
 <head>
     <title>Software Update</title>
     <meta charset="utf-8">
+    <link href="update.css" type="text/css" rel="stylesheet">
+
     <link href="../base1/cockpit.css" type="text/css" rel="stylesheet">
     <script src="../base1/jquery.js"></script>
     <script src="../base1/cockpit.js"></script>
     <script type="text/javascript">
 
-        function update_onclick() {
-            var proc = cockpit.spawn("aero-reboot-update.py");
-            proc.fail(update_onfail);
-        }
+function system_update_onclick() {                                                                                                                                                                       
+		var proc=cockpit.spawn("aero-reboot-update.py");                                                                                                                                                   
+                output.innerHTML=" ";                                                                                                                                                                           
+                proc.fail(update_system_onfail);                                                                                                                                                                
+                proc.stream(update_system_onstream);                                                                                                                                                            
+                proc.stream(update_system_ondone);                                                                                                                                                              
+               }                                                                                                                                                                                                   
+                                                                                                                                                                                                            
+                                                                                                                                                                                                            
+function update_system_onfail(data)                                                                                                                                                                         
+	 {                                                                                                                                                                                                
+		output.append(document.createTextNode(data));                                                                                                                                                   
+                output.append("\nNo USB connected. Plesae connect a USB drive with valid ISO image");                                                                                                              
+	}                                                                                                                                                                                                
+function update_system_onstream(data)                                                                                                                                                               
+        {                                                                                                                                                                                                  
+		output.append(document.createTextNode(data))                                                                                                                                                      
+        }                                                                                                                                                                                                  
+function update_system_ondone(data)                                                                                                                                                                 
+        {                                                                                                                                                                                                   
+		output.append(document.createTextNode(data));                                                                                                                                                      
+        };                       
 
-        function update_onfail(data) {
-            output.append("No USB connected or no valid OS image found");
-        }
+                                                                                                                                                                                                          
+function bios_update_onclick()                                                                                                                                                                                    
+	{
+                                                                                                                                                                                                                
+		var proc=cockpit.spawn(["rpm", "-ivh", "/home/root/custom.rpm"]);                                                                                                                                          
+     		output.innerHTML=" ";                                                                                                                                                                                  
+     		proc.fail(update_bios_onfail);                                                                                                                                                                         
+     		proc.stream(update_bios_onstream);                                                                                                                                                                     
+     		proc.done(update_bios_ondone);                                                                                                                                                                         
+	}                                                                                                                                                                                                           
+                                                                                                                                                                                                            
+function update_bios_onfail(data)                                                                                                                                                                           
+	{                                                                                                                                                                                                
+		output.append(document.createTextNode(data));                                                                                                                                                   
+            	output.append("\nupdate failed");                                                                                                                                                               
+	}
+function update_bios_onstream(data)                                                                                                                                                                 
+	{                                                                                                                                                                                                  
+        	output.append(document.createTextNode(data))                                                                                                                                                      
+        }                                                                                                                                                                                                  
+function update_bios_ondone(data)                                                                                                                                                                   
+        {                                                                                                                                                                                                   
+         	output.append(document.createTextNode(data));                                                                                                                                                      
+         	output.append("\nReboot the device to get bios updated done");                                                                                                                                     
+        }                                        
 
-    </script>
+
+function update_fpga_custom()
+	{
+		var proc=cockpit.spawn(["jam","-aprogram", "/home/root/custom.jam"]);
+     		output.innerHTML=" ";
+    		proc.done(update_fpga_ondone); 
+     		proc.stream(update_fpga_onstream);                                                                                                                                                                         
+     		proc.fail(update_fpga_fail);                                                                                                                                                                         
+	}
+
+function update_fpga_ondone(data)                                                                                                                                                                   
+	{                                                                                                                                                                                                   
+		output.append(document.createTextNode(data)); 
+          	output.append("done\n");
+	}
+                                                                                                                                                     
+function update_fpga_onstream(data)                                                                                                                                                                   
+	{                                                                                                                                                                                                   
+		output.append(document.createTextNode(data)); 
+	}                                                                                                                                                     
+
+function update_fpga_fail(data)                                                                                                                                                                   
+	{                                                                                                                                                                                                   
+		output.append(document.createTextNode(data)); 
+          	output.append("failed\n");
+	}
+
+function update_fpga()
+	{
+		var e=document.getElementById("fpga_myselect");
+		var value=e.options[e.selectedIndex].value;
+		var text=e.options[e.selectedIndex].text;
+		var proc=cockpit.spawn(["jam","-aprogram", "/etc/fpga/"+text]);                        
+     		output.innerHTML=" ";                                                                    
+     		proc.done(update_fpga_ondone);                                                           
+     		proc.stream(update_fpga_onstream);                                                       
+     		proc.fail(update_fpga_fail);                                                             
+	}                                                                                                                                                     
+
+function update_px4()
+	{
+		var e=document.getElementById("px4_myselect");
+		var value=e.options[e.selectedIndex].value;
+		var text=e.options[e.selectedIndex].text;
+		var proc=cockpit.spawn(["aerofc-update.sh", "/etc/px4-fw/"+text]);                        
+		output.innerHTML=" ";                                                                    
+     		proc.done(update_px4_ondone);                                                           
+     		proc.stream(update_px4_onstream);                                                       
+     		proc.fail(update_px4_fail);                                                             
+	}
+function update_px4_ondone(data)                                               
+	{                                                                               
+		output.append(document.createTextNode(data));                         
+          	output.append("done\n");                                              
+	}                                                                               
+                                                                                
+function update_px4_onstream(data)                                             
+	{                                                                               
+		output.append(document.createTextNode(data));                         
+	}                                                                               
+                                                                                
+function update_px4_fail(data)                                                 
+	{                                                                               
+		output.append(document.createTextNode(data));                         
+          	output.append("failed\n");                                            
+	}                   
+
+
+function update_px4_custom()
+	{
+		var proc=cockpit.spawn(["aerofc-update.sh", "/home/root/custom.px4"]);                        
+     		output.innerHTML=" ";                                                                    
+     		proc.done(update_px4_ondone);                                                           
+     		proc.stream(update_px4_onstream);                                                       
+     		proc.fail(update_px4_fail);                                                             
+	}
+
+</script>
 </head>
 <body>
-    <h2>Insert usb and click on update</h2>
-    <button type="button" onClick="update_onclick()">Update</button>
-    <span id="output" />
+<div class="tab">
+ <button class="tablinks" onClick="system_update_fileselect()">System Update</button>
+ <button class="tablinks" onClick="BIOS_update_file_select()" >BIOS Update</button>
+ <button class="tablinks" onClick="fpga_update_file_select()">FPGA Update</button>
+ <button class=tablinks" onClick="px4_update_file_select()">PX4 Update</button>
+ </div>
+
+<!--SYSTEM UPDATE--!>
+<div id="id_system_update" style='display:none'>
+<p><b>Connect USB and click on UPDATE</b></p>
+<button  onClick="system_update_onclick()">UPDATE</button>
+</div>
+<script>
+function system_update_fileselect()
+{
+$("#output").empty();
+$("#id_system_update").show();
+$("#id_px4_update_custom").hide();
+$("#id_fpga_update_custom").hide();
+$("#id_bios_update").hide();
+$("#id_px4_update").hide();
+$("#id_fpga_update").hide();
+}
+</script>
+
+<!--BIOS--!>
+<div id="id_bios_update" class="bios" style='display:none'>
+<p><b> Please select a rpm file</b></p>                                                                                                                                                                                                            
+<input type="file" id="id_bios_filetoRead" /> 
+<button  onClick="bios_update_onclick()">UPDATE</button>
+</div>    
+<script>                                                                                                                      
+function BIOS_update_file_select()                                                                                                        
+{
+$("#id_system_update").hide();
+$("#id_px4_update_custom").hide();
+$("#id_px4_update").hide();
+$("#output").empty();
+$("#id_fpga_update_custom").hide();
+$("#id_fpga_update").hide();
+$("#fpga_myselect").hide();
+$("#id_bios_filetoRead").show();                                                                                                      
+$("#id_bios_update").show();                                                                                                             
+document.getElementById("id_bios_filetoRead").addEventListener("change",function(){                                                   
+        var file = this.files[0];                                                                                             
+        if (file) {                                                                                                           
+            var reader = new window.FileReader();                                                                             
+                                                                                                                              
+            reader.onload = function (evt) {                                                                                  
+                console.log(evt);                                                                                             
+            };                                                                                                                
+                                                                                                                              
+            reader.onerror = function (evt) {                                                                                 
+                console.error("An error ocurred reading the file",evt);                                                       
+            };                                                                                                                
+            reader.onloadend = function (evt) {                                                                               
+                 cockpit.file("/home/root/custom.rpm",{binary:true}).replace(new window.Uint8Array(reader.result)).fail(function (ex){
+                 console.log(ex);                                                                                                 
+                 }).done (function(){                                                                                             
+                                                                                                                                  
+                 console.log("WROTE");                                                                                            
+                 });                                                                                                              
+            };                                                                                                                    
+            reader.readAsArrayBuffer(file);                                                                                       
+                                                                                                                                  
+        }                                                                                                                         
+    },false                                                                                                                       
+     );                                                                                                                           
+                                                                                                                                  
+}                                                                                                                                 
+</script>                    
+
+<!--FPGA--!>
+
+<div id="id_fpga_update" style='display:none'>
+<p><b>Please choose one of the options</b><p>
+<input type="radio" name="file" id="id_fpga_radio" style='display:none'   onClick="fpga_file_select()" ><label  id="id_fpga_label" style='display:none'>existing(from /etc/fpga)</label>
+<input type="radio" name="file" id="id_fpga_radio_custom" style='display:none' onClick="fpga_file_select_custom()"><label  id="id_fpga_label_custom" style='display:none'>custom</label>
+<form>
+<select id="fpga_myselect" style='display:none'>
+</select>
+</form>
+<button id="fpga_myselect_update" style='display:none' onClick="update_fpga()">UPDATE</button>
+</div>
+<div id="id_fpga_update_custom" class="fpga" style='display:none'>
+<p><b>Please select a jam file</b></p>
+<input type="file" id="fpga_filetoRead" style='display:none'/>
+<button onClick="update_fpga_custom()">UPDATE</button>
+</div>
+
+<script>
+function fpga_update_file_select()
+{
+$("#id_px4_update_custom").hide();
+$("#id_fpga_update_custom").hide();
+$("#id_system_update").hide();
+$("#id_px4_update").hide();
+$("#id_fpga_update").show();
+$("#id_fpga_radio").show();
+$("#id_fpga_radio_custom").show();
+$("#output").empty();
+$("#id_bios_update").hide();
+$("#id_fpga_label").show();
+$("#id_fpga_label_custom").show();
+}
+function fpga_file_select()
+{
+$("#fpga_myselect").empty();
+$("#id_fpga_update_custom").hide();
+$("#id4").show();   
+$("#fpga_myselect").show();   
+$("#fpga_myselect_update").show();
+var proc=cockpit.spawn("/usr/share/cockpit/softwareupdate/fpga.sh");
+proc.done(fpga_ondone);
+}
+function fpga_ondone(data)
+{
+
+ var lines=data.trim().split(/\s+/);
+ for(var i=0;i<lines.length;i++)
+{
+ var fpga_fileselect=document.getElementById("fpga_myselect");
+ var option=document.createElement("option");
+ option.text=lines[i]
+ fpga_fileselect.add(option);
+}
+
+}
+function fpga_file_select_custom()                                                                                                                                                                                      
+{
+$("#fpga_myselect_update").hide();        
+$("#fpga_myselect").hide();         
+$("#output").empty();                                                                                                                                                                                          
+$("#id_bios_update").hide();
+$("#fpga_filetoRead").show();                                                                                                                                                                                    
+                                                                                                                                                                                                            
+$("#id_fpga_update_custom").show();                                                                                                                                                                                           
+document.getElementById("fpga_filetoRead").addEventListener("change",function(){                                                                                                                                 
+        var file = this.files[0];                                                                                                                                                                           
+        if (file) {                                                                                                                                                                                         
+            var reader = new window.FileReader();                                                                                                                                                           
+                                                                                                                                                                                                            
+            reader.onload = function (evt) {                                                                                                                                                                
+                console.log(evt);                                                                                                                                                                           
+            };                                                                                                                                                                                              
+                                                                                                                                                                                                            
+            reader.onerror = function (evt) {                                                                                                                                                               
+                console.error("An error ocurred reading the file",evt);                                                                                                                                     
+            };                                                                                                                                                                                              
+            reader.onloadend = function (evt) {                                                                                                                                                             
+                 cockpit.file("/home/root/custom.jam",{binary:true}).replace(new window.Uint8Array(reader.result)).fail(function (ex){                                                                          
+                 console.log(ex);                                                                                                                                                                           
+                 }).done (function(){                                                                                                                                                                       
+                                                                                                                                                                                                            
+                 console.log("WROTE");                                                                                                                                                                      
+                 });                                                                                                                                                                                        
+            };                                                                                                                                                                                              
+            reader.readAsArrayBuffer(file);                                                                                                                                                                 
+                                                                                                                                                                                                            
+        }                                                                                                                                                                                                   
+    },false                                                                                                                                                                                                 
+     );                                                                                                                                                                                                     
+                                                                                                                                                                                                            
+}                                                                                                                                                                                                           
+</script>
+<!--PX4--!>                                                                                                                                                                                        
+
+<div id="id_px4_update" style='display:none'>   
+<p><b>Please choose one of the options</b></p>                                                                                                                                                                                   
+<input type="radio" name="file" id="id_px4_radio" style='display:none'   onClick="px4_file_select()" ><label  id="id_px4_label" style='display:none'>existing(from /etc/px4-fw)</label>
+<input type="radio" name="file" id="id_px4_radio_custom" style='display:none' onClick="px4_file_select_custom()"><label id="id_px4_label_custom" style='display:none'>custom</label>                   
+<form>                                                                                                                                                                                              
+<select id="px4_myselect"  style='display:none'>                                                                                                                                                        
+</select>                                                                                                                                                                                           
+</form>                                                                                                                                                                                             
+<button id="px4_myselect_update" style='display:none' onClick="update_px4()">UPDATE</button>                                                                                                   
+</div>           
+<div id="id_px4_update_custom" class="fpga" style='display:none'>                                                                                                                                                    
+<p><b> Please select a px4 file</b></p>                                                                                                                                                                    
+<input type="file" id="px4_filetoRead" />                                                                                                                                          
+<button  id="px4_update"  onClick="update_px4_custom()">UPDATE</button>                                                                                                                              
+</div>                                                                                                                                                                                              
+                                                                                                                                                                                                    
+<script>
+function px4_update_file_select()
+{
+$("#id_fpga_update_custom").hide();
+$("#id_system_update").hide();
+$("#id_px4_update").show();
+$("#output").empty();
+$("#id_bios_update").hide();
+$("#id_fpga_update").hide();
+$("#id_px4_radio").show();
+$("#id_px4_label").show();
+$("#id_px4_radio_custom").show();
+$("#id_px4_label_custom").show();
+}
+function px4_file_select()
+{
+$("#id_px4_update_custom").hide();
+$("#px4_myselect").empty();
+$("#px4_myselect_update").show();
+$("#px4_myselect").show();
+var proc=cockpit.spawn("/usr/share/cockpit/softwareupdate/px4.sh");                                                                                                                                         
+proc.done(ondone);                                                                                                                                                                                  
+
+}                                                                                                                                                                                                   
+function ondone(data)                                                                                                                                                                               
+{                                                                                                                                                                                                   
+ var lines=data.trim().split(/\s+/);                                                                                                                                                                
+ for(var i=0;i<lines.length;i++)                                                                                                                                                                    
+{                                                                                                                                                                                                   
+ var px4_fileselect=document.getElementById("px4_myselect");                                                                                                                                                         
+ var option=document.createElement("option");                                                                                                                                                       
+ option.text=lines[i]                                                                                                                                                                               
+ px4_fileselect.add(option);                                                                                                                                                                                     
+}                     
+
+
+}
+function px4_file_select_custom()                                                                                                                                                                       
+{
+$("#output").empty();                                                                                                                                                                                                   
+$("#px4_myselect").hide();
+$("#px4_myselect_update").hide();
+$("#id_px4_update_custom").show();
+document.getElementById("px4_filetoRead").addEventListener("change",function(){                                                                                                                        
+        var file = this.files[0];                                                                                                                                                                   
+        if (file) {                                                                                                                                                                                 
+            var reader = new window.FileReader();                                                                                                                                                   
+                                                                                                                                                                                                    
+            reader.onload = function (evt) {                                                                                                                                                        
+                console.log(evt);                                                                                                                                                                   
+            };                                                                                                                                                                                      
+                                                                                                                                                                                                    
+            reader.onerror = function (evt) {                                                                                                                                                       
+                console.error("An error ocurred reading the file",evt);                                                                                                                             
+            };                                                                                                                                                                                      
+            reader.onloadend = function (evt) {                                                                                                                                                     
+                 cockpit.file("/home/root/custom.px4",{binary:true}).replace(new window.Uint8Array(reader.result)).fail(function (ex){                                                                  
+                 console.log(ex);                                                                                                                                                                   
+                 }).done (function(){                                                                                                                                                               
+                                                                                                                                                                                                    
+                 console.log("WROTE");                                                                                                                                                              
+                 });                                                                                                                                                                                
+            };                                                                                                                                                                                      
+            reader.readAsArrayBuffer(file);                                                                                                                                                         
+                                                                                                                                                                                                    
+        }                                                                                                                                                                                           
+    },false                                                                                                                                                                                         
+     );                                                                                                                                                                                             
+                                                                                                                                                                                                    
+}                           
+
+
+</script>                 
+                                                                                                                                                                                                    
+<br>
+<br>
+<pre id="output"></pre>
+</br>
+</br>
+
+
 </body>
